@@ -1,0 +1,34 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user profile stored in Firestore.",
+      "type": "object",
+      "properties": {
+        "fullName": {
+          "type": "string",
+          "description": "Full official name of the user"
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp for account creation time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp for when the account was last updated"
+        }
+      },
+      "required": ["email"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Profiles of registered users"
+    }
+  }
+}

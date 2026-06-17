@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Nextern",
+  "description": "Professional internship and project experience platform that helps students gain practical skills through project-based internships.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
