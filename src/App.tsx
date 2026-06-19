@@ -14,8 +14,7 @@ import { UniversityDashboard } from "./components/UniversityDashboard";
 import { VerificationPortal } from "./components/VerificationPortal";
 import { AuthModal } from "./components/AuthModal";
 import { ShieldCheck, Layers, BookOpen, UserCheck, Star } from "lucide-react";
-import { getAccessToken, sendGmailMessage, auth, fetchUserProfile, logoutAuth } from "./lib/googleAuth";
-import { onAuthStateChanged } from "firebase/auth";
+import { getAccessToken, sendGmailMessage, logoutAuth } from "./lib/googleAuth";
 
 export default function App() {
   // Theme state
@@ -102,47 +101,6 @@ export default function App() {
     localStorage.setItem("nextern_emails", JSON.stringify(systemEmails));
   }, [systemEmails]);
 
-  // Listen for Firebase auth state changes to persist and restore sessions
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        const saved = localStorage.getItem("nextern_current_user");
-        let parsed: User | null = null;
-        if (saved) {
-          try { parsed = JSON.parse(saved); } catch (e) {}
-        }
-
-        if (!parsed || parsed.email !== firebaseUser.email) {
-          try {
-            const profile = await fetchUserProfile(firebaseUser.uid);
-            const recoveredUser: User = {
-              id: firebaseUser.uid,
-              name: profile?.fullName || firebaseUser.displayName || firebaseUser.email?.split("@")[0] || "Student",
-              email: firebaseUser.email || "",
-              role: UserRole.STUDENT,
-              verified: firebaseUser.emailVerified || true,
-            };
-            setCurrentUser(recoveredUser);
-          } catch (err) {
-            console.error("Failed to fetch user profile on auth change:", err);
-          }
-        }
-      } else {
-        const saved = localStorage.getItem("nextern_current_user");
-        if (saved) {
-          try {
-            const parsed: User = JSON.parse(saved);
-            if (parsed && !parsed.id.startsWith("NX-USR-SHORTCUT-")) {
-              setCurrentUser(null);
-            }
-          } catch (e) {}
-        }
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
   const handleToggleDarkMode = () => {
     setDarkMode(!darkMode);
   };
@@ -170,14 +128,14 @@ export default function App() {
     }
 
     setViewingVerify(false);
-    setIsViewingDashboard(false); // Stay on Home / Landing page after successful login
+    setIsViewingDashboard(true);
   };
 
   const handleLogout = async () => {
     try {
       await logoutAuth();
     } catch (e) {
-      console.warn("Could not log out of Firebase Auth", e);
+      console.warn("Failed to sign out from Firebase during logout", e);
     }
     setCurrentUser(null);
     setViewingVerify(false);
@@ -185,34 +143,18 @@ export default function App() {
   };
 
   const handleSelectRoleDirectly = (selectedRole: UserRole) => {
-    // Convenience shortcut trigger for seamless evaluator walkthroughs!
-    const customNameMap = {
-      [UserRole.STUDENT]: "Sarah Jenkins",
-      [UserRole.RECRUITER]: "Jordan Vance",
-      [UserRole.ADMIN]: "Alex Mercer",
-      [UserRole.UNIVERSITY]: "Dr. Helen Rostova"
-    };
-
-    const customEmailMap = {
-      [UserRole.STUDENT]: "sarah@university.edu",
-      [UserRole.RECRUITER]: "recruitment@shopee.com",
-      [UserRole.ADMIN]: "admin@nextern.dev",
-      [UserRole.UNIVERSITY]: "rostova@imperial.ac.uk"
-    };
-
-    const newUser: User = {
-      id: `NX-USR-SHORTCUT-${selectedRole}`,
-      name: customNameMap[selectedRole],
-      email: customEmailMap[selectedRole],
-      role: selectedRole,
-      verified: true,
-      universityName: selectedRole === UserRole.UNIVERSITY ? "Imperial College London" : undefined
-    };
-
-    setCurrentUser(newUser);
-    setViewingVerify(false);
-    setIsViewingDashboard(true);
-    handleLogEmail(newUser.email, "REGISTRATION", `Bypass authenticated role: ${selectedRole}`);
+    if (currentUser) {
+      const updatedUser: User = {
+        ...currentUser,
+        role: selectedRole,
+        universityName: selectedRole === UserRole.UNIVERSITY ? "Imperial College London" : currentUser.universityName
+      };
+      setCurrentUser(updatedUser);
+      setViewingVerify(false);
+      setIsViewingDashboard(true);
+    } else {
+      setAuthOpen(true);
+    }
   };
 
   const handleLogEmail = async (recipient: string, type: "REGISTRATION" | "OFFER_LETTER" | "TASK_UNLOCK" | "COMPLETION" | "CERTIFICATE", subject: string) => {
@@ -337,6 +279,7 @@ export default function App() {
         darkMode={darkMode}
         onToggleDarkMode={handleToggleDarkMode}
         onOpenVerification={() => setViewingVerify(true)}
+        onSelectRole={handleSelectRoleDirectly}
         onBackToLanding={() => {
           setIsViewingDashboard(false);
           setViewingVerify(false);

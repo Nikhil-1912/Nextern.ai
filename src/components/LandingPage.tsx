@@ -263,7 +263,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onExplor
       </section>
 
       {/* SECTION 3: FEATURED DOMAINS INTERACTIVE CARDS */}
-      <section id="featured-domains" className="max-w-6xl mx-auto px-4">
+      <section className="max-w-6xl mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
           <h2 className="text-2xl sm:text-3.5xl md:text-4xl font-pixel uppercase text-slate-955 dark:text-white tracking-normal">
             14 ARCH INTERNSHIP PATHWAYS

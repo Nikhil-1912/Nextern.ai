@@ -267,6 +267,8 @@ export const GmailConsole: React.FC<GmailConsoleProps> = ({ user, activeInternsh
             </button>
           </div>
 
+
+
           <div className="p-3.5 bg-yellow-50 dark:bg-zinc-950 border border-yellow-250 dark:border-zinc-800 rounded-lg text-left max-w-lg mx-auto flex gap-3 text-[11px] leading-relaxed text-zinc-500 font-sans">
             <ShieldCheck className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
             <div>
