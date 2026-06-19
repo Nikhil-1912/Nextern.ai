@@ -1,10 +1,10 @@
 {
-  "projectId": "iron-destiny-rz908",
-  "appId": "1:1024353100957:web:30cfc793b19f2568aae074",
-  "apiKey": "AIzaSyD8iiuMMpRtSt-kPBGbMi6ryWloMsm3M20",
+  "projectId": "nextern-ai",
+  "appId": "1:349991236898:web:9a7585bb72fcdddb0ee17b",
+  "apiKey": "AIzaSyDG6CskMLgG-YL934W9Uj3OX-Ch5yP6NEQ",
   "authDomain": "iron-destiny-rz908.firebaseapp.com",
   "firestoreDatabaseId": "ai-studio-f67f26ce-559d-44f7-a6f5-d70f257dfe5f",
-  "storageBucket": "iron-destiny-rz908.firebasestorage.app",
-  "messagingSenderId": "1024353100957",
-  "measurementId": ""
+  "storageBucket": "nextern-ai.firebasestorage.app",
+  "messagingSenderId": "349991236898",
+  "measurementId": "G-6VMN6L7B9"
 }
