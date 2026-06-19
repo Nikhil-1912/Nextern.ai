@@ -14,7 +14,8 @@ import { UniversityDashboard } from "./components/UniversityDashboard";
 import { VerificationPortal } from "./components/VerificationPortal";
 import { AuthModal } from "./components/AuthModal";
 import { ShieldCheck, Layers, BookOpen, UserCheck, Star } from "lucide-react";
-import { getAccessToken, sendGmailMessage } from "./lib/googleAuth";
+import { getAccessToken, sendGmailMessage, auth, fetchUserProfile, logoutAuth } from "./lib/googleAuth";
+import { onAuthStateChanged } from "firebase/auth";
 
 export default function App() {
   // Theme state
@@ -101,6 +102,47 @@ export default function App() {
     localStorage.setItem("nextern_emails", JSON.stringify(systemEmails));
   }, [systemEmails]);
 
+  // Listen for Firebase auth state changes to persist and restore sessions
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        const saved = localStorage.getItem("nextern_current_user");
+        let parsed: User | null = null;
+        if (saved) {
+          try { parsed = JSON.parse(saved); } catch (e) {}
+        }
+
+        if (!parsed || parsed.email !== firebaseUser.email) {
+          try {
+            const profile = await fetchUserProfile(firebaseUser.uid);
+            const recoveredUser: User = {
+              id: firebaseUser.uid,
+              name: profile?.fullName || firebaseUser.displayName || firebaseUser.email?.split("@")[0] || "Student",
+              email: firebaseUser.email || "",
+              role: UserRole.STUDENT,
+              verified: firebaseUser.emailVerified || true,
+            };
+            setCurrentUser(recoveredUser);
+          } catch (err) {
+            console.error("Failed to fetch user profile on auth change:", err);
+          }
+        }
+      } else {
+        const saved = localStorage.getItem("nextern_current_user");
+        if (saved) {
+          try {
+            const parsed: User = JSON.parse(saved);
+            if (parsed && !parsed.id.startsWith("NX-USR-SHORTCUT-")) {
+              setCurrentUser(null);
+            }
+          } catch (e) {}
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   const handleToggleDarkMode = () => {
     setDarkMode(!darkMode);
   };
@@ -128,10 +170,15 @@ export default function App() {
     }
 
     setViewingVerify(false);
-    setIsViewingDashboard(true);
+    setIsViewingDashboard(false); // Stay on Home / Landing page after successful login
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await logoutAuth();
+    } catch (e) {
+      console.warn("Could not log out of Firebase Auth", e);
+    }
     setCurrentUser(null);
     setViewingVerify(false);
     setIsViewingDashboard(false);
@@ -227,8 +274,10 @@ export default function App() {
             }
           }}
           onExploreDomains={() => {
-            // Set mock student role for instant path selection experience!
-            handleSelectRoleDirectly(UserRole.STUDENT);
+            const el = document.getElementById("featured-domains");
+            if (el) {
+              el.scrollIntoView({ behavior: "smooth" });
+            }
           }}
           onSelectRole={(role) => handleSelectRoleDirectly(role)}
         />
@@ -265,7 +314,12 @@ export default function App() {
                 setAuthOpen(true);
               }
             }}
-            onExploreDomains={() => handleSelectRoleDirectly(UserRole.STUDENT)}
+            onExploreDomains={() => {
+              const el = document.getElementById("featured-domains");
+              if (el) {
+                el.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
             onSelectRole={handleSelectRoleDirectly}
           />
         );
@@ -283,7 +337,6 @@ export default function App() {
         darkMode={darkMode}
         onToggleDarkMode={handleToggleDarkMode}
         onOpenVerification={() => setViewingVerify(true)}
-        onSelectRole={handleSelectRoleDirectly}
         onBackToLanding={() => {
           setIsViewingDashboard(false);
           setViewingVerify(false);
