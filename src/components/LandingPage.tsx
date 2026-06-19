@@ -266,7 +266,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onExplor
       <section className="max-w-6xl mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
           <h2 className="text-2xl sm:text-3.5xl md:text-4xl font-pixel uppercase text-slate-955 dark:text-white tracking-normal">
-            14 ARCH INTERNSHIP PATHWAYS
+            7+ ARCH INTERNSHIP PATHWAYS
           </h2>
           <div className="w-24 h-2 bg-gradient-to-r from-indigo-500 to-amber-400 mx-auto border border-zinc-950" />
           <p className="text-zinc-500 dark:text-zinc-400 text-xs font-sans leading-relaxed">
@@ -347,7 +347,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onExplor
                   <span className="font-pixel text-[8px] text-blue-600 dark:text-blue-400 uppercase block mb-1">01 / DISCOVERY</span>
                   <h4 className="font-pixel text-[11px] uppercase text-zinc-950 dark:text-white leading-snug">Apply for Intern</h4>
                 </div>
-                <p className="text-[10px] text-zinc-500 leading-normal font-sans mt-2">Pick from 14 modern tracks. Setup your interactive workspace instantly.</p>
+                <p className="text-[10px] text-zinc-500 leading-normal font-sans mt-2">Pick from 7+ modern tracks. Setup your interactive workspace instantly.</p>
               </div>
 
               {/* Arrow 1 */}
