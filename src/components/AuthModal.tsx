@@ -94,7 +94,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
         onClose();
       }
     } catch (err: any) {
-      setErrorMsg(err.message || "Google Sign-In failed.");
+      console.error("Google Sign-In Error:", err);
+      if (err.code === "auth/unauthorized-domain" || (err.message && err.message.includes("unauthorized-domain"))) {
+        setErrorMsg("auth/unauthorized-domain");
+      } else {
+        setErrorMsg(err.message || "Google Sign-In failed.");
+      }
     } finally {
       setLoading(false);
     }
@@ -166,7 +171,72 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                 </div>
               )}
 
-              {errorMsg && (
+              {errorMsg === "auth/unauthorized-domain" ? (
+                <div className="p-4 mb-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded-xl text-amber-800 dark:text-amber-200 text-xs space-y-3">
+                  <div className="flex items-center gap-2 font-semibold text-sm text-amber-900 dark:text-amber-205">
+                    <ShieldCheck className="w-5 h-5 text-amber-550 shrink-0" />
+                    <span>Domain Authorization Required</span>
+                  </div>
+                  <p className="leading-relaxed">
+                    Firebase blocked this authentication flow because the current domain is not registered as an authorized domain in your <strong>nextern-ai</strong> project.
+                  </p>
+                  
+                  <div className="space-y-1.5 pt-1">
+                    <span className="font-semibold block uppercase tracking-wide text-[9px] text-zinc-500 dark:text-zinc-400">
+                      Domains you MUST authorize:
+                    </span>
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between p-1.5 px-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg">
+                        <code className="font-mono text-[10px] select-all">{window.location.hostname}</code>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(window.location.hostname);
+                          }}
+                          className="text-[10px] uppercase font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
+                        >
+                          Copy
+                        </button>
+                      </div>
+                      <div className="flex items-center justify-between p-1.5 px-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg">
+                        <code className="font-mono text-[10px] select-all">nexternai.netlify.app</code>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText("nexternai.netlify.app");
+                          }}
+                          className="text-[10px] uppercase font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
+                        >
+                          Copy
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1 pt-1 border-t border-amber-200/40 dark:border-amber-900/40 leading-relaxed text-[11px]">
+                    <span className="font-semibold block uppercase tracking-wide text-[9px] text-zinc-500 dark:text-zinc-400">
+                      How to add them:
+                    </span>
+                    <ol className="list-decimal pl-4 space-y-0.5 text-zinc-700 dark:text-zinc-300">
+                      <li>Open your <a href="https://console.firebase.google.com" target="_blank" rel="noopener noreferrer" className="underline font-semibold text-indigo-600 dark:text-indigo-400">Firebase Console</a></li>
+                      <li>Select your project <strong>nextern-ai</strong></li>
+                      <li>Go to <strong>Authentication</strong> &rarr; <strong>Settings</strong> &rarr; <strong>Authorized domains</strong></li>
+                      <li>Click <strong>Add domain</strong> and add both domains from above</li>
+                      <li>Refresh this page &amp; try again!</li>
+                    </ol>
+                  </div>
+                  
+                  <div className="pt-1">
+                    <button 
+                      type="button"
+                      onClick={() => setErrorMsg("")}
+                      className="w-full py-2 bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/40 dark:hover:bg-amber-900/60 font-semibold rounded-lg text-center text-amber-900 dark:text-amber-200 transition-colors text-[10.5px]"
+                    >
+                      Close &amp; Reset
+                    </button>
+                  </div>
+                </div>
+              ) : errorMsg && (
                 <div className="p-3 mb-4 bg-red-50 text-red-600 text-xs rounded-lg font-medium flex items-start gap-2">
                   <div className="mt-0.5"><Lock className="w-4 h-4" /></div>
                   <p>{errorMsg}</p>
